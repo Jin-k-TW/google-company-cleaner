@@ -5,15 +5,14 @@ import requests
 from bs4 import BeautifulSoup
 import re
 
-def extract_company_info(uploaded_file):
-    # Streamlitのアップロードファイル対応
+def run_scraper_from_dataframe(uploaded_file):
     df = pd.read_excel(uploaded_file)
 
     # 正規表現パターン定義
     patterns = {
-        "従業員数": re.compile(r"(従業員数|社員数)[^\d]{0,5}?(\d{2,5}) ?人"),
-        "資本金": re.compile(r"(資本金)[^\d]{0,5}?(\d{3,}) ?(円|万円|億円)?"),
-        "売上高": re.compile(r"(売上高)[^\d]{0,5}?(\d{3,}) ?(円|万円|億円)?"),
+        "従業員数": re.compile(r"従業員[数員]\s*[:：]?\s*([\d,]+)\s*人"),
+        "資本金": re.compile(r"資本金\s*[:：]?\s*([\d,]+)\s*(百万円|万円|円)?"),
+        "売上高": re.compile(r"売上高\s*[:：]?\s*([\d,]+)\s*(百万円|万円|億円|円)?")
     }
 
     results = []
@@ -45,9 +44,9 @@ def extract_company_info(uploaded_file):
             results.append({
                 "企業名": company,
                 "URL": url,
-                "従業員数": emp.group(2) + "人" if emp else "",
-                "資本金": cap.group(2) + (cap.group(3) or "") if cap else "",
-                "売上高": rev.group(2) + (rev.group(3) or "") if rev else "",
+                "従業員数": emp.group(1) + "人" if emp else "",
+                "資本金": cap.group(1) + (cap.group(2) or "") if cap else "",
+                "売上高": rev.group(1) + (rev.group(2) or "") if rev else "",
                 "取得元": "HTML"
             })
 
