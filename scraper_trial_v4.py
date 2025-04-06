@@ -1,19 +1,14 @@
-# scraper_trial_v4.py
-
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 import re
 
-def extract_company_info(uploaded_file):
-    # アップロードファイルをDataFrameに読み込み
-    df = pd.read_excel(uploaded_file)
-
-    # 正規表現パターン
+# DataFrameから情報抽出する関数
+def run_scraper_from_dataframe(df):
     patterns = {
-        "従業員数": re.compile(r"従業員数[\s\u3000:\-]*([\d,]{1,5})(名)?"),
-        "資本金": re.compile(r"資本金[\s\u3000:\-]*([\d,]{1,5})(万|千|百)?円"),
-        "売上高": re.compile(r"売上高[\s\u3000:\-]*([\d,]{1,5})(億|万)?円")
+        "従業員数": re.compile(r"(従業員数|社員数)[：: ]*([\d,]+)人"),
+        "資本金": re.compile(r"(資本金)[：: ]*([\d,]+[百千億万円]*)"),
+        "売上高": re.compile(r"(売上高)[：: ]*([\d,]+[百千億万円]*)")
     }
 
     results = []
@@ -45,13 +40,13 @@ def extract_company_info(uploaded_file):
             results.append({
                 "企業名": company,
                 "URL": url,
-                "従業員数": emp.group(1) + (emp.group(2) or "") if emp else "",
-                "資本金": cap.group(1) + (cap.group(2) or "") + "円" if cap else "",
-                "売上高": rev.group(1) + (rev.group(2) or "") + "円" if rev else "",
+                "従業員数": emp.group(2) if emp else "",
+                "資本金": cap.group(2) if cap else "",
+                "売上高": rev.group(2) if rev else "",
                 "取得元": "HTML"
             })
 
-        except Exception:
+        except Exception as e:
             results.append({
                 "企業名": company,
                 "URL": url,
