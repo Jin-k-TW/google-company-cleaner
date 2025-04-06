@@ -96,3 +96,10 @@ output_path = os.path.join(os.path.dirname(__file__), "企業情報_抽出結果
 df_out = pd.DataFrame(results)
 df_out.to_excel(output_path, index=False)
 print(f"✅ 完了！保存先: {output_path}")
+
+# ファイルの最下部に追加してください
+if __name__ == "__main__":
+    import sys
+    input_path = sys.argv[1]
+    output_path = sys.argv[2]
+    run_scraper(input_path, output_path)
